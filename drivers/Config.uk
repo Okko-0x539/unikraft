@@ -27,3 +27,9 @@ config HAVE_IBMPC
 	bool
 	select HAVE_IBMPC_NS16550
 	select HAVE_IBMPC_VGA
+
+menu "VMware"
+
+source "$(shell,$(UK_BASE)/support/build/config-submenu.sh -q -o '$(KCONFIG_DIR)/drivers-vmware.uk' -r '$(KCONFIG_DRIV_BASE)/vmware' -l '$(KCONFIG_DRIV_BASE)/vmware' -e '$(KCONFIG_EXCLUDEDIRS)')"
+
+endmenu
