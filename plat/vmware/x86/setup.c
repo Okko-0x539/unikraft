@@ -47,6 +47,8 @@ void _ukplat_entry(struct lcpu *lcpu, struct ukplat_bootinfo *bi)
 	void *bstack;
 	int rc;
 
+	_libvmwareplat_init_console();
+
 	/* Initialize trap vector table */
 	traps_table_init();
 
