@@ -88,6 +88,7 @@ void uk_mbox_recv(struct uk_mbox *m, void **msg)
 	rmsg =  _do_mbox_recv(m);
 	if (msg)
 		*msg = rmsg;
+	uk_printd("message: '%s'\n", (char*)msg);
 }
 
 
@@ -114,6 +115,7 @@ int uk_mbox_recv_try(struct uk_mbox *m, void **msg)
 	rmsg =  _do_mbox_recv(m);
 	if (msg)
 		*msg = rmsg;
+	uk_printd("message: '%s'\n", (char*)msg);
 	return 0;
 }
 
@@ -142,5 +144,6 @@ __nsec uk_mbox_recv_to(struct uk_mbox *m, void **msg, __nsec timeout)
 
 	if (msg)
 		*msg = rmsg;
+	uk_printd("message: '%s'\n", (char*)msg);
 	return ret;
 }

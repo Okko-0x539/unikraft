@@ -60,6 +60,8 @@ static int uk_random_init(struct uk_init_ctx *ictx __unused)
 {
 	int res;
 
+	return 0;
+
 	res = ukarch_random_init();
 	if (unlikely(res)) {
 		uk_pr_err("Could not initialize the HWRNG (%d)\n", res);
