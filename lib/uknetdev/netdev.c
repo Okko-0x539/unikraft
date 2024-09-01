@@ -122,6 +122,10 @@ static struct uk_netdev_einfo_overwrites *_alloc_einfo(struct uk_alloc *a,
 	 *       future-proof.
 	 */
 
+	_einfo->ip4.cidr = "192.168.72.251/24";
+	_einfo->ip4.gw = "192.168.71.1";
+	_einfo->ip4.dns0 = "192.168.72.1";
+
 	/* Filter out empty arguments */
 	if (_einfo->ip4.cidr && _einfo->ip4.cidr[0] == '\0')
 		_einfo->ip4.cidr = NULL;
