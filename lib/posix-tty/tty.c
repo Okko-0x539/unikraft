@@ -10,6 +10,7 @@
 #include <uk/posix-fdtab.h>
 #include <uk/posix-pseudofile.h>
 #include <uk/posix-serialfile.h>
+#include <uk/posix-keyboardfile.h>
 
 static int init_posix_tty(struct uk_init_ctx *ictx __unused)
 {
@@ -17,7 +18,9 @@ static int init_posix_tty(struct uk_init_ctx *ictx __unused)
 	const struct uk_file *out;
 	int r;
 
-#if CONFIG_LIBPOSIX_TTY_STDIN_NULL
+#if CONFIG_VMWARE_KEYBOARD_STDIN
+	in = uk_keyboard_stdin_file_create();
+#elif CONFIG_LIBPOSIX_TTY_STDIN_NULL
 	in = uk_nullfile_create();
 #elif CONFIG_LIBPOSIX_TTY_STDIN_VOID
 	in = uk_voidfile_create();

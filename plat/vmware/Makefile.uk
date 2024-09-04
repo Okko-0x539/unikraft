@@ -57,6 +57,8 @@ ifeq ($(findstring y,$(CONFIG_VMWARE_KERNEL_SERIAL_CONSOLE) $(CONFIG_VMWARE_DEBU
 LIBVMWAREPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBVMWAREPLAT_BASE)/x86/serial_console.c
 endif
 
+LIBVMWAREPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBVMWAREPLAT_BASE)/x86/keyboard.c
+
 LIBVMWAREPLAT_SRCS-y                          += $(LIBVMWAREPLAT_BASE)/shutdown.c
 LIBVMWAREPLAT_SRCS-y                          += $(LIBVMWAREPLAT_BASE)/memory.c
 LIBVMWAREPLAT_SRCS-y                          += $(LIBVMWAREPLAT_BASE)/io.c

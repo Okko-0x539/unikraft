@@ -59,7 +59,7 @@ static int uk_boot_early_init_parse_cmdl(struct ukplat_bootinfo *bi)
 	boot_argc = uk_argnparse(cmdline, cmdline_len, boot_argv,
 				 CONFIG_LIBUKBOOT_MAXNBARGS);
 
-#if CONFIG_LIBUKLIBPARAM
+#ifndef CONFIG_LIBUKLIBPARAM
 	/*
 	 * First, we scan if we can find the stop sequence in the kernel
 	 * cmdline. If not, we assume that there are no uklibparam arguments in
@@ -112,6 +112,7 @@ void uk_boot_early_init(struct ukplat_bootinfo *bi)
 	struct uk_boot_earlytab_entry *entry;
 	int rc;
 
+	uk_pr_info("DADADA uk_boot_early_init\n");
 	UK_ASSERT(bi);
 
 	ukplat_bootinfo_print();

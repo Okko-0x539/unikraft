@@ -18,6 +18,12 @@ if (PLAT_VMWARE)
 
 menu "Console Options"
 
+config VMWARE_KEYBOARD_STDIN
+        bool "Enable (and override) stdin from keyboard"
+        default y
+        help
+          Enable (and override) stdin from keyboard
+
 config VMWARE_KERNEL_VGA_CONSOLE
         bool "VGA console for the kernel prints"
         default y

@@ -18,7 +18,7 @@ if LIBPOSIX_TTY
 		bool "Void file: wait for input forever"
 
 		config LIBPOSIX_TTY_STDIN_SERIAL
-		bool "Serial: platform-specific serial input"
+		bool "Serial: platform-specific serial/keyboard input"
 		select LIBPOSIX_TTY_SERIAL
 
 	endchoice

@@ -28,6 +28,9 @@
 #include <uk/plat/console.h>
 #include <uk/config.h>
 #include <uk/essentials.h>
+#if CONFIG_VMWARE_KEYBOARD_STDIN
+#include <vmware-x86/keyboard.h>
+#endif
 #if (CONFIG_VMWARE_DEBUG_VGA_CONSOLE || CONFIG_VMWARE_KERNEL_VGA_CONSOLE)
 #include <vmware-x86/vga_console.h>
 #endif
@@ -78,12 +81,22 @@ int ukplat_cink(char *buf __maybe_unused, unsigned int maxlen __maybe_unused)
 	int ret __maybe_unused;
 	unsigned int num = 0;
 
-#if CONFIG_VMWARE_KERNEL_SERIAL_CONSOLE
+	ukplat_coutk("NUNUNU", sizeof("NUNUNU"));
+
+#if CONFIG_VMWARE_KEYBOARD_STDIN
+	while (num < maxlen
+	       && (ret = _libvmwareplat_keyboard_getc()) >= 0) {
+		*(buf++) = (char) ret;
+		num++;
+	}
+#elif CONFIG_VMWARE_KERNEL_SERIAL_CONSOLE
 	while (num < maxlen
 	       && (ret = _libvmwareplat_serial_getc()) >= 0) {
 		*(buf++) = (char) ret;
 		num++;
 	}
 #endif
+
+	ukplat_coutk("DADADADADADADA", sizeof("DADADADADADADA"));
 	return (int) num;
 }

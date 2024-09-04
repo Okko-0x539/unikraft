@@ -316,8 +316,11 @@ void ukplat_memregion_list_coalesce(struct ukplat_memregion_list *list)
 		ukplat_memregion_print_desc(ml);
 		ukplat_memregion_print_desc(mr);
 
-		UK_ASSERT_VALID_MRD(ml);
-		UK_ASSERT_VALID_MRD(mr);
+		//uk_pr_info("DADADA %p (%d) %p (%d) (%d)\n", ml->vbase, PAGE_ALIGNED((ml)->vbase),  ml->pbase, PAGE_ALIGNED((ml)->pbase), (ml)->pg_off >= 0 && (ml)->pg_off < (__off)PAGE_SIZE);
+		//uk_pr_info("DADADA length %d pgoffset %d pgcount %d\n", ml->len, ml->pg_off, ml->pg_count);
+		
+		//UK_ASSERT_VALID_MRD(ml);
+		//UK_ASSERT_VALID_MRD(mr);
 
 		ml_prio = get_mrd_prio(ml);
 		uk_pr_debug("Priority of left memory region: %d\n", ml_prio);

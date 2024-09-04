@@ -23,17 +23,109 @@
 
 void _ukplat_entry(struct lcpu *lcpu, struct ukplat_bootinfo *bi);
 
+void size_t_to_string(size_t num, char* str) {
+    size_t i = 0;
+    size_t j;
+    char temp;
+
+    // Handle zero explicitly
+    if (num == 0) {
+        str[i++] = '0';
+        str[i] = '\0';
+        return;
+    }
+
+    // Convert size_t to string
+    while (num > 0) {
+        str[i++] = (num % 10) + '0';
+        num /= 10;
+    }
+
+    str[i] = '\0';
+
+    // Reverse the string
+    for (j = 0; j < i / 2; j++) {
+        temp = str[j];
+        str[j] = str[i - j - 1];
+        str[i - j - 1] = temp;
+    }
+}
+
+char *my_strcat(char *dest, const char *src) {
+    char *ptr = dest;
+
+    // Move ptr to the end of dest
+    while (*ptr != '\0') {
+        ptr++;
+    }
+
+    // Copy src to the end of dest
+    while (*src != '\0') {
+        *ptr++ = *src++;
+    }
+
+    // Null-terminate the concatenated string
+    *ptr = '\0';
+
+    return dest;
+}
+
+static int first4096verified = 0;
+
+
 static inline void mrd_insert(struct ukplat_bootinfo *bi,
-			      const struct ukplat_memregion_desc *mrd)
+			      const struct ukplat_memregion_desc *mrd,
+				  size_t temp)
 {
 	int rc;
 
 	if (unlikely(mrd->len == 0))
 		return;
 
+	if(!PAGE_ALIGNED(mrd->pbase)) //!PAGE_ALIGNED(mrd->pbase) || )
+	{
+		char buffer[16] = {0};
+		size_t_to_string(mrd->type, buffer);
+		my_strcat(buffer, " + ");
+		char tempNr[16] = {0};
+		size_t_to_string(temp, tempNr);
+		my_strcat(buffer, tempNr);
+		memcpy(bi->bootloader, buffer, sizeof(buffer));
+
+		char buffer2[16] = {0};
+		size_t_to_string(mrd->pbase, buffer2);
+		memcpy(bi->bootprotocol, buffer2, sizeof(buffer2));
+		//multiboot_crash("DADADA", mrd.pbase);
+	}
+
 	rc = ukplat_memregion_list_insert(&bi->mrds, mrd);
 	if (unlikely(rc < 0))
 		multiboot_crash("Cannot insert bootinfo memory region", rc);
+
+	int nr_of_regions_ok = bi->mrds.count;
+	int i = 0;
+	while (i + 1 < bi->mrds.count) {
+		struct ukplat_memregion_desc* temp = &bi->mrds.mrds[i];
+
+		if(!PAGE_ALIGNED(temp->pbase))
+		{
+			char buffer[16] = {0};
+			size_t_to_string(rc, buffer);
+			my_strcat(buffer, " = ");
+			char tempNr[16] = {0};
+			size_t_to_string(i, tempNr);
+			my_strcat(buffer, tempNr);
+			memcpy(bi->bootloader, buffer, sizeof(buffer));
+
+			char buffer2[16] = {0};
+			size_t_to_string(temp->pbase, buffer2);
+			memcpy(bi->bootprotocol, buffer2, sizeof(buffer2));
+
+			nr_of_regions_ok--;
+		}
+
+		i++;
+	}
 }
 
 /**
@@ -98,8 +190,7 @@ void multiboot_entry(struct lcpu *lcpu, struct multiboot_info *mi)
 			strncpy(mrd.name, (char *)(__uptr)mods[i].cmdline,
 				sizeof(mrd.name) - 1);
 #endif /* CONFIG_UKPLAT_MEMRNAME */
-
-			mrd_insert(bi, &mrd);
+			mrd_insert(bi, &mrd, i);
 		}
 	}
 
@@ -143,10 +234,39 @@ void multiboot_entry(struct lcpu *lcpu, struct multiboot_info *mi)
 				 */
 			}
 
-			mrd_insert(bi, &mrd);
+			mrd_insert(bi, &mrd, offset);
 		}
 	}
 
+	// Memory sanity checks before entering platform
+
+	
+	// int nr_of_regions_ok = bi->mrds.count;
+	// i = 0;
+	// while (i + 1 < bi->mrds.count) {
+	// 	struct ukplat_memregion_desc* temp = &bi->mrds.mrds[i];
+
+	// 	if(!PAGE_ALIGNED(temp->pbase))
+	// 	{
+	// 		char buffer[16] = {0};
+	// 		size_t_to_string(temp->pbase, buffer);
+	// 		memcpy(bi->bootloader, buffer, sizeof(buffer));
+
+	// 		char buffer2[16] = {0};
+	// 		size_t_to_string(temp->len, buffer2);
+	// 		memcpy(bi->bootprotocol, buffer2, sizeof(buffer2));
+
+	// 		nr_of_regions_ok--;
+	// 	}
+
+	// 	i++;
+	// }
+
+	// if(nr_of_regions_ok == bi->mrds.count)
+	// {
+	// 		char buffer[16] = "everything ok";
+	// 		memcpy(bi->bootloader, buffer, sizeof(buffer));
+	// }
 
 	_ukplat_entry(lcpu, bi);
 }
