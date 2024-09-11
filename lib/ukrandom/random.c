@@ -58,14 +58,14 @@ void uk_random_fill_buffer(void *buf, size_t buflen)
 
 static int uk_random_init(struct uk_init_ctx *ictx __unused)
 {
-	// int res;
-	// TODO: ukarch_random_init returns -1 on VMware 
-	// res = ukarch_random_init();
-	// if (unlikely(res)) {
-	// 	uk_pr_err("Could not initialize the HWRNG (%d)\n", res);
-	// 	return res;
-	// }
-	ukarch_random_init();
+	int res;
+	
+	res = ukarch_random_init();
+	if (unlikely(res)) {
+		uk_pr_err("Could not initialize the HWRNG (%d)\n", res);
+		return res;
+	}
+	//ukarch_random_init();
 	return uk_swrand_init();
 }
 
