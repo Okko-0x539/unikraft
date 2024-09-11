@@ -675,8 +675,7 @@ UK_TESTCASE(ukvmem, test_vma_stack)
 
 	/* But we should be able to change attributes for the whole VMA */
 	rc = uk_vma_set_attr(vas, va2 - UK_VMA_STACK_BOTTOM_GUARD_SIZE,
-			     VMEM_STACKSIZE + UK_VMA_STACK_GUARDS_SIZE,
-			     PROT_R, 0);
+			     VMEM_STACKSIZE + UK_VMA_STACK_GUARDS_SIZE, PROT_R, 0);
 	UK_TEST_EXPECT_ZERO(rc);
 
 	vas_clean(vas);
