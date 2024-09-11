@@ -22,9 +22,19 @@ if (ARCH_X86_64)
 	source "$(UK_BASE)/arch/x86/x86_64/Config.uk"
 endif
 if (ARCH_ARM_32)
+	config HAVE_MEMTAG
+	bool
+	prompt "Memory tagging support"
+	help
+	  Memory tagging support.
 	source "$(UK_BASE)/arch/arm/arm/Config.uk"
 endif
 if (ARCH_ARM_64)
+	config HAVE_MEMTAG
+	bool
+	prompt "Memory tagging support"
+	help
+	  Memory tagging support.
 	source "$(UK_BASE)/arch/arm/arm64/Config.uk"
 endif
 
@@ -60,3 +70,9 @@ config HAVE_MEMTAG
 	bool
 	help
 	  Memory tagging support.
+
+config HAVE_RANDOM
+	bool
+	prompt "Processor-generated randomness support"
+	help
+		Processor-generated randomness support.
