@@ -12,7 +12,7 @@
 #include <uk/assert.h>
 #include <uk/file.h>
 #include <uk/file/nops.h>
-#include <uk/plat/console.h>
+#include <uk/console.h>
 #include <uk/posix-fd.h>
 #include <uk/posix-serialfile.h>
 
@@ -50,6 +50,42 @@ static const char SERIAL_TERMIOS_CONTROL_CHARS[KNCCS] = {
 	[VWERASE] = 027,
 };
 
+/* TODO: Some consoles require both a newline and a carriage return to
+ * go to the start of the next line. This kind of behavior should be in
+ * a single place in posix-tty. We keep this workaround until we have feature
+ * in posix-tty that handles newline characters correctly.
+ */
+static inline __ssz _console_out(const char *buf, __sz len)
+{
+	const char *next_nl = NULL;
+	__sz l = len;
+	__sz off = 0;
+	__ssz rc = 0;
+
+	if (unlikely(!len))
+		return 0;
+	if (unlikely(!buf))
+		return -EINVAL;
+
+	while (l > 0) {
+		next_nl = memchr(buf, '\n', l);
+		if (next_nl) {
+			off = next_nl - buf;
+			if ((rc = uk_console_out(buf, off)) < 0)
+				return rc;
+			if ((rc = uk_console_out("\r\n", 2)) < 0)
+				return rc;
+			buf = next_nl + 1;
+			l -= off + 1;
+		} else {
+			if ((rc = uk_console_out(buf, l)) < 0)
+				return rc;
+			break;
+		}
+	}
+
+	return len;
+}
 
 static ssize_t serial_read(const struct uk_file *f,
 			   const struct iovec *iov, int iovcnt,
@@ -73,7 +109,7 @@ static ssize_t serial_read(const struct uk_file *f,
 		if (unlikely(!buf && len))
 			return -EFAULT;
 
-		bytes_read = ukplat_cink(buf, len);
+		bytes_read = uk_console_in(buf, len);
 		if (!bytes_read)
 			break;
 		if (unlikely(bytes_read < 0))
@@ -86,7 +122,7 @@ static ssize_t serial_read(const struct uk_file *f,
 			*last = '\n';
 
 		/* Echo the input to the console (NOT stdout!) */
-		ukplat_coutk(buf, bytes_read);
+		_console_out(buf, bytes_read);
 
 		if (*last == '\n')
 			break;
@@ -118,7 +154,7 @@ static ssize_t serial_write(const struct uk_file *f __maybe_unused,
 		if (unlikely(!buf && len))
 			return  -EFAULT;
 
-		bytes_written = ukplat_coutk(buf, len);
+		bytes_written = _console_out(buf, len);
 		if (unlikely(bytes_written < 0))
 			return bytes_written;
 

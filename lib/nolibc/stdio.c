@@ -67,7 +67,47 @@
 
 #include <uk/essentials.h>
 #include <uk/arch/lcpu.h>
-#include <uk/plat/console.h>
+
+#if CONFIG_LIBUKCONSOLE
+#include <uk/console.h>
+
+/* TODO: Some consoles require both a newline and a carriage return to
+ * go to the start of the next line. This kind of behavior should be in
+ * a single place in posix-tty. We keep this workaround until we have feature
+ * in posix-tty that handles newline characters correctly.
+ */
+static inline __ssz _console_out(const char *buf, __sz len)
+{
+	const char *next_nl = NULL;
+	__sz l = len;
+	__sz off = 0;
+	__ssz rc = 0;
+
+	if (unlikely(!len))
+		return 0;
+	if (unlikely(!buf))
+		return -EINVAL;
+
+	while (l > 0) {
+		next_nl = memchr(buf, '\n', l);
+		if (next_nl) {
+			off = next_nl - buf;
+			if ((rc = uk_console_out(buf, off)) < 0)
+				return rc;
+			if ((rc = uk_console_out("\r\n", 2)) < 0)
+				return rc;
+			buf = next_nl + 1;
+			l -= off + 1;
+		} else {
+			if ((rc = uk_console_out(buf, l)) < 0)
+				return rc;
+			break;
+		}
+	}
+
+	return len;
+}
+#endif /* CONFIG_LIBUKCONSOLE */
 
 /* 64 bits + 0-Byte at end */
 #define MAXNBUF 65
@@ -434,7 +474,8 @@ int sprintf(char *str, const char *fmt, ...)
 	return ret;
 }
 
-int vfprintf(FILE *fp, const char *fmt, va_list ap)
+int vfprintf(FILE *fp __maybe_unused, const char *fmt __maybe_unused,
+	     va_list ap __maybe_unused)
 {
 	int ret;
 	char buf[1024];
@@ -446,10 +487,12 @@ int vfprintf(FILE *fp, const char *fmt, va_list ap)
 	/* we do not support device handling for now, we
 	 * just send the buffer content to the kernel console
 	 */
-	if (fp == stdout)
-		ret = ukplat_coutk(buf, ret);
-	else if (fp == stderr)
-		ret = ukplat_coutd(buf, ret);
+	if (fp == stdout || fp == stderr)
+#if CONFIG_LIBUKCONSOLE
+		ret = _console_out(buf, ret);
+#else /* !CONFIG_LIBUKCONSOLE */
+		ret = strlen(buf);
+#endif /* !CONFIG_LIBUKCONSOLE */
 	else
 		return 0;
 
@@ -491,20 +534,21 @@ int fflush(FILE *fp __unused)
 	return 0;
 }
 
-int fputc(int _c, FILE *fp)
+int fputc(int _c __maybe_unused, FILE *fp __maybe_unused)
 {
+#if CONFIG_LIBUKCONSOLE
 	int ret = 0;
 	unsigned char c = _c;
 
-	if (fp == stdout)
-		ret = ukplat_coutk((char *)&c, 1);
-	else if (fp == stderr)
-		ret = ukplat_coutd((char *)&c, 1);
+	if (fp == stdout || fp == stderr)
+		ret = _console_out((char *)&c, 1);
 
 	if (ret == 1)
 		return _c;
 
 	return EOF;
+#endif /* CONFIG_LIBUKCONSOLE */
+	return _c;
 }
 
 int putchar(int c)
@@ -513,30 +557,31 @@ int putchar(int c)
 }
 
 static int
-fputs_internal(const char *restrict s, FILE *restrict stream, int newline)
+fputs_internal(const char *restrict s __maybe_unused,
+	       FILE *restrict stream __maybe_unused,
+	       int newline __maybe_unused)
 {
+#if CONFIG_LIBUKCONSOLE
 	int ret;
 	size_t len;
 
 	len = strlen(s);
 
-	if (stream == stdout)
-		ret = ukplat_coutk(s, len);
-	else if (stream == stderr)
-		ret = ukplat_coutd(s, len);
+	if (stream == stdout || stream == stderr)
+		ret = _console_out(s, len);
 	else
 		return EOF;
 
-	/* If ukplat_cout{d,k} weren't able to write all characters, assume that
-	 * an error happened and there is no point in retrying.
+	/* If _console_out wasn't able to write all characters, assume
+	 * that an error happened and there is no point in retrying.
 	 */
 	if ((size_t)ret != len)
 		return EOF;
 
 	if (newline)
 		return fputc('\n', stream);
-	else
-		return 1;
+#endif /* !CONFIG_LIBUKCONSOLE */
+	return 1;
 }
 
 int fputs(const char *restrict s, FILE *restrict stream)
