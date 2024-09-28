@@ -1,0 +1,10 @@
+config E1000
+    bool  "E1000 driver"
+    depends on VMWARE_DEVICE
+    select LIBUKSGLIST
+    select LIBUKNETDEV
+    select LIBUKNETDEV_DISPATCHERTHREADS
+    select LIBUKNETDEV_EINFO_LIBPARAM
+    select LIBPOSIX_TIME
+    help
+            E1000 driver for VMWare networking.
