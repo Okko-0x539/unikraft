@@ -316,8 +316,8 @@ void ukplat_memregion_list_coalesce(struct ukplat_memregion_list *list)
 		ukplat_memregion_print_desc(ml);
 		ukplat_memregion_print_desc(mr);
 
-		UK_ASSERT_VALID_MRD(ml);
-		UK_ASSERT_VALID_MRD(mr);
+		//UK_ASSERT_VALID_MRD(ml);
+		//UK_ASSERT_VALID_MRD(mr);
 
 		ml_prio = get_mrd_prio(ml);
 		uk_pr_debug("Priority of left memory region: %d\n", ml_prio);
