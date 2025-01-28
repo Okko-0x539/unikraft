@@ -69,7 +69,7 @@ static int uk_boot_early_init_parse_cmdl(struct ukplat_bootinfo *bi)
 	 */
 	rc = uk_libparam_parse(boot_argc - 1, &boot_argv[1],
 			       UK_LIBPARAM_F_SCAN);
-	if (rc > 0 && rc <= (boot_argc - 1)){
+	if (rc > 0 && rc < (boot_argc - 1)) {
 		/* In this case, we did successfully scan for uklibparam
 		 * arguments and stop sequence is at rc < (argc - 1).
 		 */
@@ -82,9 +82,7 @@ static int uk_boot_early_init_parse_cmdl(struct ukplat_bootinfo *bi)
 		/* Drop uklibparam parameters from argv but keep argv[0].
 		 * We are going to replace the stop sequence with argv[0].
 		 */
-
-		//FIX: this increment leads to boot_argc always = 0 which triggers the assert at boot.c@269
-		//rc += 1; /* include argv[0]; we use rc as idx to stop seq */
+		rc += 1; /* include argv[0]; we use rc as idx to stop seq */
 		boot_argc -= rc;
 		boot_argv[rc] = boot_argv[0];
 		boot_argv = &boot_argv[rc];
