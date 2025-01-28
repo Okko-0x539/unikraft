@@ -22,8 +22,6 @@
 #ifndef __VMWARE_SERIAL_CONSOLE__
 #define __VMWARE_SERIAL_CONSOLE__
 
-void _libvmwareplat_init_serial_console(void);
-void _libvmwareplat_serial_putc(char a);
-int  _libvmwareplat_serial_getc(void);
+
 
 #endif /* __VMWARE_SERIAL_CONSOLE__ */
