@@ -18,7 +18,6 @@
 #include <uk/essentials.h>
 #include <uk/intctlr.h>
 
-#include <vmware/console.h>
 
 #include <uk/plat/lcpu.h>
 #include <uk/plat/common/lcpu.h>
@@ -46,8 +45,6 @@ void _ukplat_entry(struct lcpu *lcpu, struct ukplat_bootinfo *bi)
 {
 	void *bstack;
 	int rc;
-
-	_libvmwareplat_init_console();
 
 	/* Initialize trap vector table */
 	traps_table_init();
