@@ -57,9 +57,9 @@ void multiboot_entry(struct lcpu *lcpu, struct multiboot_info *mi)
 		multiboot_crash("Incompatible or corrupted bootinfo", -EINVAL);
 
 	/* We have to call this here as the very early do_uk_reloc32 relocator
-		* does not also relocate the UKPLAT_MEMRT_KERNEL mrd's like its C
-		* equivalent, do_uk_reloc, does.
-		*/
+	* does not also relocate the UKPLAT_MEMRT_KERNEL mrd's like its C
+	* equivalent, do_uk_reloc, does.
+	*/
 	do_uk_reloc_kmrds(0, 0);
 	/* Ensure that the memory map contains the legacy high mem area */
 	rc = ukplat_memregion_list_insert_legacy_hi_mem(&bi->mrds);

@@ -26,3 +26,56 @@ menuconfig PLAT_VMWARE
 	imply LIBVGACONS
 	help
 		Create a Unikraft image that runs as a VMware guest
+
+if (PLAT_VMWARE)
+
+choice
+	prompt "Boot protocol"
+	default VMWARE_BOOT_PROTO_MULTIBOOT
+
+config VMWARE_BOOT_PROTO_MULTIBOOT
+	bool "Multiboot"
+	depends on ARCH_X86_64
+	help
+		Multiboot Boot Protocol Version 1
+
+config VMWARE_BOOT_PROTO_EFI_STUB
+	bool "EFI stub"
+	depends on OPTIMIZE_PIE
+	select UKPLAT_ACPI
+	help
+		Make Unikraft bootable by UEFI firmware
+
+comment "Hint: EFI stub depends on OPTIMIZE_PIE"
+	depends on !OPTIMIZE_PIE
+endchoice
+
+if VMWARE_BOOT_PROTO_EFI_STUB
+
+config VMWARE_BOOT_PROTO_EFI_STUB_CMDLINE_FNAME
+	string "Name of the command line arguments file"
+	default "$(UK_NAME).cmdl"
+
+config VMWARE_BOOT_PROTO_EFI_STUB_INITRD_FNAME
+	string "Name of the initial RAM disk file"
+	default "$(UK_NAME).initrd"
+
+config VMWARE_BOOT_PROTO_EFI_STUB_DTB_FNAME
+	string "Name of the Devicetree Blob file"
+	default "$(UK_NAME).dtb"
+
+config VMWARE_BOOT_PROTO_EFI_STUB_RST_ATK_MITIGATION
+	bool "TCG Reset Attack Mitigation"
+	default n
+	help
+		Enable Trusted Computing Group's Reset Attack Mitigation.
+		Whenever a machine shuts down or reboots, due to lack of
+		electric charge, the contents of RAM may dissipate after a short
+		amount of time. However this may be enough for an attacker to
+		quickly boot again into a custom program and dump memory
+		contents. Thus, by using this, the OS instructs POST BIOS to
+		overwrite memory contents before continuing to boot into the
+		rest of the BIOS code.
+
+endif
+endif
