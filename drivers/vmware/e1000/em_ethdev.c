@@ -147,6 +147,7 @@ eth_em_dev_init(struct pci_device * pci_dev)
 			pci_dev->id.device_id);
 		return -ENODEV;
 	}
+	pci_dev->irq = 223;
 
 	rc = uk_intctlr_irq_register(pci_dev->irq, eth_em_interrupt_handler, hw);
 	if (rc != 0) {
