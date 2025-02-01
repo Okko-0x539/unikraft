@@ -33,7 +33,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef CONFIG_PLAT_KVM
 #include <kvm-x86/traps.h>
+#else
+#include <vmware-x86/traps.h>
+#endif
 #include <uk/arch/lcpu.h>
 #include <uk/asm.h>
 #include <uk/asm/cfi.h>
