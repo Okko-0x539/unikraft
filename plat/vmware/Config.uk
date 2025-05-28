@@ -13,6 +13,7 @@ menuconfig PLAT_VMWARE
 	select HAVE_INTCTLR
 	select HAVE_APIC
 	select LIBUKINTCTLR_XPIC
+	select HAVE_IBMPC_PS2 if ARCH_X86_64
 	select HAVE_PCI
 	select LIBUKBUS_PCI
 	imply LIBVIRTIO_9P if LIBUK9P
@@ -23,6 +24,7 @@ menuconfig PLAT_VMWARE
 	imply LIBNS16550 if LIBUKCONSOLE
 	imply LIBNS16550_EARLY_CONSOLE if LIBUKCONSOLE
 	imply LIBNS16550_COM1 if LIBUKCONSOLE
+	imply LIBUKPS2_KBD if ARCH_X86_64
 	imply LIBVGACONS
 	help
 		Create a Unikraft image that runs as a VMware guest
