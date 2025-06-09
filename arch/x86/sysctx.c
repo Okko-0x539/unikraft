@@ -34,8 +34,8 @@ void ukarch_sysctx_set_gsbase(struct ukarch_sysctx *sysctx, __uptr gsbase)
 {
 	UK_ASSERT(sysctx);
 
-	uk_pr_debug("Sysctx %p GS_BASE register updated to %p (before: %p)\n",
-		    sysctx, (void *)gsbase, (void *)sysctx->gsbase);
+	//uk_pr_debug("Sysctx %p GS_BASE register updated to %p (before: %p)\n",
+	//	    sysctx, (void *)gsbase, (void *)sysctx->gsbase);
 
 	sysctx->gsbase = gsbase;
 }

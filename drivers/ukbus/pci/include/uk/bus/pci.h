@@ -300,6 +300,7 @@ static struct pci_bus_handler ph __unused;
 #define PCI_FUNC_OFFSET      8
 #define PCI_CONFIG_ADDRESS_ENABLE   0x80000000
 #define PCI_COMMAND_OFFSET   0x4
+#define PCI_MEM_SPACE_ENABLE_BIT 0x1
 #define PCI_BUS_MASTER_BIT   0x2
 #define PCI_STATUS_OFFSET    0x6
 #define PCI_CLASS_REVISION   0x8

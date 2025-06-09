@@ -292,6 +292,54 @@ static void ukplat_memregion_swap_if_unordered(struct ukplat_memregion_list *l,
 	}
 }
 
+void print_mem_region(const void *mem, size_t size) {
+	uk_pr_info("\n------------------MEMORY ZONE %X-%X------------------\n", mem, mem + size);
+    const unsigned char *bytes = (const unsigned char*) mem;
+    for (size_t i = 0; i < size; i++) {
+        uk_pr_info("%02x ", bytes[i]);
+    }
+	uk_pr_info("\n---------------END OF MEMORY ZONE %X-%X--------------\n", mem, mem + size);
+}
+
+int valid_uk_mrd(const struct ukplat_memregion_desc *mrd)
+{
+    if (!mrd)
+        return 1;
+
+    /* Verificarea tipului: se acceptă doar tipurile definite */
+    switch (mrd->type) {
+        case UKPLAT_MEMRT_FREE:
+        case UKPLAT_MEMRT_RESERVED:
+        case UKPLAT_MEMRT_KERNEL:
+        case UKPLAT_MEMRT_INITRD:
+        case UKPLAT_MEMRT_DEVICETREE:
+        case UKPLAT_MEMRT_STACK:
+        case UKPLAT_MEMRT_DEVICE:
+            break;
+        default:
+            return 2;
+    }
+
+    /* Verificarea flag-urilor: se permit doar READ, WRITE și EXECUTE */
+    {
+        __u16 flags_all = UKPLAT_MEMRF_READ | UKPLAT_MEMRF_WRITE | UKPLAT_MEMRF_EXECUTE;
+        if ((mrd->flags & flags_all) != mrd->flags)
+            return 3;
+    }
+
+    /* Verificarea aliniamentului paginilor pentru adresele virtuale și fizice */
+    if (!PAGE_ALIGNED(mrd->vbase))
+        return 4;
+    if (!PAGE_ALIGNED(mrd->pbase))
+        return 5;
+
+    /* Verificarea offset-ului din pagină să fie în intervalul [0, PAGE_SIZE) */
+    if (!(mrd->pg_off >= 0 && mrd->pg_off < (__off)PAGE_SIZE))
+        return 6;
+
+    return 0;
+}
+
 void ukplat_memregion_list_coalesce(struct ukplat_memregion_list *list)
 {
 	struct ukplat_memregion_desc *m, *ml, *mr;
@@ -316,8 +364,23 @@ void ukplat_memregion_list_coalesce(struct ukplat_memregion_list *list)
 		ukplat_memregion_print_desc(ml);
 		ukplat_memregion_print_desc(mr);
 
-		//UK_ASSERT_VALID_MRD(ml);
-		//UK_ASSERT_VALID_MRD(mr);
+		UK_ASSERT_VALID_MRD(ml);
+		UK_ASSERT_VALID_MRD(mr);
+
+		int ret = valid_uk_mrd(ml);
+		if(ret != 0) 
+		{
+			//print_mem_region(ml->pbase, ml->len);
+			uk_pr_err("DADADA valid_uk_mrd(ml) a failat cu %d\n", ret);
+			uk_pr_err("DADADA vbase %X pbase %X len %zu (%X) pg_count %zu pg_off %zu flags %zu type %zu\n", ml->vbase, ml->pbase, ml->len, ml->len, ml->pg_count, ml->pg_off, ml->flags, ml->type);
+		}
+		ret = valid_uk_mrd(mr);
+		if(ret != 0) 
+		{
+			//print_mem_region(mr->pbase, mr->len);
+			uk_pr_err("DADADA valid_uk_mrd(mr) a failat cu %d\n", ret);
+			uk_pr_err("DADADA vbase %X pbase %X len %zu (%X) pg_count %zu pg_off %zu flags %zu type %zu\n", mr->vbase, mr->pbase, mr->len, mr->len, mr->pg_count, mr->pg_off, mr->flags, mr->type);
+		}
 
 		ml_prio = get_mrd_prio(ml);
 		uk_pr_debug("Priority of left memory region: %d\n", ml_prio);

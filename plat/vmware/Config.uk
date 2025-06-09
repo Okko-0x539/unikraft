@@ -79,5 +79,13 @@ config VMWARE_BOOT_PROTO_EFI_STUB_RST_ATK_MITIGATION
 		overwrite memory contents before continuing to boot into the
 		rest of the BIOS code.
 
+config VMWARE_BOOT_PROTO_EFI_STUB_SETUP_GOP
+	bool "EFI GOP Console"
+	default y
+	select EFIGOPCONS
+	help
+		Enable initialization of the EFI Graphics Output Protocol (GOP)
+		console. Also enables EFI GOP console driver.
+
 endif
 endif

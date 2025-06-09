@@ -1,8 +1,10 @@
 config VMXNET3
     bool  "Vmxnet3 driver"
     depends on VMWARE_DEVICE
+    select LIBUKBUS_PCI
+    select LIBUKBUS_PLATFORM
     select LIBUKSGLIST
     select LIBUKNETDEV
     select LIBUKNETDEV_EINFO_LIBPARAM
     help
-            Vmxnet3 driver for VMWare networking.
+        Vmxnet3 driver for VMWare networking.

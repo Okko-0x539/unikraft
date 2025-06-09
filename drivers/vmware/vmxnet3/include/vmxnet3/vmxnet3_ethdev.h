@@ -9,6 +9,11 @@
 #include <uk/arch/types.h>
 #include <uk/plat/common/cpu.h>
 #include <uk/netdev.h>
+#include <uk/plat/io.h>
+#ifdef CONFIG_LIBUKVMEM
+#include <uk/vmem.h>
+#include <uk/falloc.h>
+#endif /* CONFIG_LIBUKVMEM */
 
 #include <vmxnet3/vmxnet3_ethdev.h>
 

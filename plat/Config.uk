@@ -123,7 +123,7 @@ config FPSIMD
 #        This warning will be removed once we have restructured the menu to
 #        only allow a single platform (including external platforms).
 comment "Warning: Selecting multiple platforms is unsupported!"
-	depends on PLAT_KVM && PLAT_XEN
+	depends on (PLAT_KVM && PLAT_XEN) || (PLAT_VMWARE && PLAT_XEN) || (PLAT_VMWARE && PLAT_KVM)
 
 config HAVE_SHUTDOWN_DISPATCHER
 	bool

@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <uk/list.h>
 #include <uk/bus/pci.h>
+#include <uk/bus/platform.h>
 #include <uk/config.h>
 #include <uk/arch/types.h>
 #include <uk/plat/lcpu.h>
@@ -125,7 +126,15 @@ eth_em_dev_init(struct pci_device * pci_dev)
 	hw->netdev.ops = &eth_em_dev_ops;
 	hw->netdev.rx_one = &eth_em_recv_pkts;
 	hw->netdev.tx_one = &eth_em_xmit_pkts;
+#ifdef CONFIG_PAGING
+	hw->hw_addr = (unsigned char *) (long) uk_bus_pf_devmap(hw->pdev->bar0 & 0xFFFFFFF0, E1000_REGISTER_SET_SIZE);
+	if (unlikely(PTRISERR(hw->hw_addr))) {
+		uk_pr_err("Could not map e1000 hw_addr (BAR0) (%x)\n", PTR2ERR(hw->pdev->bar0 & 0xFFFFFFF0));
+		return -EIO;
+	}
+#else
 	hw->hw_addr = (unsigned char *) (long) (hw->pdev->bar0 & 0xFFFFFFF0);
+#endif /* CONFIG_PAGING */
 	hw->device_id = pci_dev->id.device_id;
 
 	rc = uk_netdev_drv_register(&hw->netdev, a, drv_name);
@@ -147,7 +156,6 @@ eth_em_dev_init(struct pci_device * pci_dev)
 			pci_dev->id.device_id);
 		return -ENODEV;
 	}
-	pci_dev->irq = 223;
 
 	rc = uk_intctlr_irq_register(pci_dev->irq, eth_em_interrupt_handler, hw);
 	if (rc != 0) {

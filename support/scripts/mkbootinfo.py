@@ -23,10 +23,10 @@ UKPLAT_MEMRF_EXECUTE = 0x0004  # Region is executable
 UKPLAT_MEMR_NAME_LEN = 36
 
 # Boot info structure (see include/uk/plat/common/bootinfo.h)
-UKPLAT_BOOTINFO_SIZE = 80
+UKPLAT_BOOTINFO_SIZE = 88
 
 UKPLAT_BOOTINFO_MAGIC = 0xB007B0B0  # Boot Bobo
-UKPLAT_BOOTINFO_VERSION = 0x01
+UKPLAT_BOOTINFO_VERSION = 0x02
 
 PAGE_SIZE = 4096
 PAGE_SHIFT = 12
@@ -107,6 +107,7 @@ def main():
         secobj.write(b"\0" * 8)  # cmdline_len
         secobj.write(b"\0" * 8)  # dtb
         secobj.write(b"\0" * 8)  # efi_st
+        secobj.write(b"\0" * 8)  # efi_gop
         secobj.write(cap.to_bytes(4, endianness))  # mrds.capacity
         secobj.write(b"\0" * 4)  # mrds.count
 
@@ -133,6 +134,8 @@ def main():
             # Offset in the first page is equal to the start of the first page
             pg_off = 0
 
+            if int(phdr[1], base=16) < 100:
+                continue
             # Align size up to page size
             size = (int(phdr[1], base=16) + (PAGE_SIZE - 1)) & ~(PAGE_SIZE - 1)
             if size == 0:

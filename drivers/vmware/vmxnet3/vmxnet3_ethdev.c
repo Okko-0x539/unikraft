@@ -2,7 +2,6 @@
  * Copyright(c) 2010-2015 Intel Corporation
  */
 
-// #include <sys/queue.h>
 #include <stdio.h>
 #include <errno.h>
 #include <stdint.h>
@@ -12,6 +11,7 @@
 #include <fcntl.h>
 #include <inttypes.h>
 #include <uk/bus/pci.h>
+#include <uk/bus/platform.h>
 
 #include <uk/netdev_core.h>
 #include <uk/netdev_driver.h>
@@ -179,7 +179,7 @@ void adjust_pci_device(struct pci_device *pci __unused) {
 			| (pci->addr.devid << PCI_DEVICE_SHIFT);
 	PCI_CONF_READ(uint16_t, &cmd, config_addr, COMMAND);
 
-	outl(PCI_CONFIG_ADDR | PCI_CONF_COMMAND, cmd | (1 << PCI_BUS_MASTER_BIT));
+	outl(PCI_CONFIG_ADDR | PCI_CONF_COMMAND, cmd | (1 << PCI_BUS_MASTER_BIT) | (1 << PCI_MEM_SPACE_ENABLE_BIT));
 
 	config_addr = (PCI_ENABLE_BIT)
 			| (pci->addr.bus << PCI_BUS_SHIFT)
@@ -215,8 +215,22 @@ vmxnet3_add_dev(struct pci_device * pci_dev)
 	hw->num_rx_queues = 1;
 	hw->num_tx_queues = 1;
 	hw->bufs_per_pkt = 1;
+
+#if CONFIG_PAGING
+	hw->hw_addr0 = (uint32_t *) (long) uk_bus_pf_devmap(pci_dev->bar0, VMXNET3_PT_REG_SIZE);
+	if (unlikely(PTRISERR(hw->hw_addr0))) {
+		uk_pr_err("Could not map vmxnet3 PT_REG (BAR0) address (%x)\n", PTR2ERR(pci_dev->bar0));
+		return -EIO;
+	}
+	hw->hw_addr1 = (uint32_t *) (long) uk_bus_pf_devmap(pci_dev->bar1, VMXNET3_VD_REG_SIZE);
+	if (unlikely(PTRISERR(hw->hw_addr1))) {
+		uk_pr_err("Could not map vmxnet3 VD_REG (BAR1) address (%x)\n", PTR2ERR(pci_dev->bar1));
+		return -EIO;
+	}
+#else
 	hw->hw_addr1 = (uint32_t *) (long) pci_dev->bar1;
 	hw->hw_addr0 = (uint32_t *) (long) pci_dev->bar0;
+#endif /* CONFIG_PAGING */
 
 	rc = uk_netdev_drv_register(&hw->netdev, a, drv_name);
 	if (rc < 0) {
@@ -376,7 +390,7 @@ vmxnet3_dev_configure(struct uk_netdev *dev,
 	memset(mz, 0, sizeof(struct Vmxnet3_DriverShared));
 
 	hw->shared = (Vmxnet3_DriverShared *) mz;
-	hw->sharedPA = (uint64_t) mz;
+	hw->sharedPA = (uint64_t) ukplat_virt_to_phys(mz);
 
 	/*
 	 * Allocate a memzone for Vmxnet3_RxQueueDesc - Vmxnet3_TxQueueDesc
@@ -395,7 +409,7 @@ vmxnet3_dev_configure(struct uk_netdev *dev,
 
 	hw->tqd_start = (Vmxnet3_TxQueueDesc *)mz;
 	hw->rqd_start = (Vmxnet3_RxQueueDesc *)(hw->tqd_start + hw->num_tx_queues);
-	hw->queueDescPA = (uint64_t) mz;
+	hw->queueDescPA = (uint64_t) ukplat_virt_to_phys(mz);
 	hw->queue_desc_len = (uint16_t)size;
 
 	vmxnet3_alloc_intr_resources(dev);
@@ -522,7 +536,7 @@ vmxnet3_dev_setup_memreg(struct uk_netdev *dev)
 			return -ENOMEM;
 		}
 		hw->memRegs = (Vmxnet3_MemRegs *) mz;
-		hw->memRegsPA = (uint64_t) mz;
+		hw->memRegsPA = (uint64_t) ukplat_virt_to_phys(mz);
 	}
 
 	num = hw->num_rx_queues;

@@ -37,6 +37,7 @@ static void __noreturn ukplat_entry2(void)
 	UK_BUG(); /* noreturn */
 }
 
+extern char _text[];
 
 /* At this point we expect that the C runtime is configured and that
  * bootcode has enabled all CPU features used by compiled code.
@@ -48,7 +49,7 @@ void _ukplat_entry(struct lcpu *lcpu, struct ukplat_bootinfo *bi)
 
 	/* Initialize trap vector table */
 	traps_table_init();
-
+	// TODO: probabil aici apar erorile alea de la coalesce memory regions - deci problema e probabil la multiboot
 	/* Execute ealry init */
 	uk_boot_early_init(bi);
 
@@ -100,6 +101,7 @@ void _ukplat_entry(struct lcpu *lcpu, struct ukplat_bootinfo *bi)
 	_check_ospke();
 #endif /* CONFIG_HAVE_X86PKU */
 
+	uk_pr_warn("_text address is %p\n", _text);
 	/* Switch away from the bootstrap stack */
 	uk_pr_info("Switch from bootstrap stack to stack @%p\n", bstack);
 	lcpu_arch_jump_to(bstack, ukplat_entry2);

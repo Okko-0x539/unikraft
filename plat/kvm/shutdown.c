@@ -26,7 +26,7 @@
 #include <uk/plat/common/irq.h>
 #include <uk/print.h>
 #include <uk/plat/bootstrap.h>
-#include <kvm/efi.h>
+#include <uk/plat/common/efi.h>
 #include <uk/plat/common/bootinfo.h>
 
 static void cpu_halt(void) __noreturn;

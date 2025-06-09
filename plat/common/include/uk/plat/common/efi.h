@@ -29,15 +29,20 @@ typedef void *uk_efi_event_t;
 typedef void *uk_efi_hndl_t;
 typedef __u64 uk_efi_tpl_t;
 
-struct uk_efi_guid {
+typedef struct uk_efi_guid {
 	__u32 b0_3;
 	__u16 b4_5;
 	__u16 b6_7;
 	__u8 b8_15[8];
-} __align(8);
+} __align(8) uk_efi_guid_t;
 
 enum uk_efi_if_type {
 	EFI_NATIVE_INTERFACE
+};
+
+static const uk_efi_guid_t EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID = {
+    0x9042a9de, 0x23dc, 0x4a38,
+    { 0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a }
 };
 
 #define UK_EFI_VARIABLE_NON_VOLATILE				0x00000001
@@ -115,6 +120,20 @@ enum uk_efi_reset_type {
 	UK_EFI_RESET_PLATFORM_SPECIFIC
 };
 
+struct uk_efi_graphics_output_blt_pixel {
+  __u8    Blue;
+  __u8    Green;
+  __u8    Red;
+  __u8    Reserved;
+};
+
+struct uk_efi_pixel_bitmask{
+  __u32    RedMask;
+  __u32    GreenMask;
+  __u32    BlueMask;
+  __u32    ReservedMask;
+};
+
 enum uk_efi_graphics_pixel_format {
 	UK_EFI_PIXEL_RED_GREEN_BLUE_RESERVED_8BIT_PER_COLOR,
 	UK_EFI_PIXEL_BLUE_GREEN_RED_RESERVED_8BIT_PER_COLOR,
@@ -129,6 +148,43 @@ enum uk_efi_graphics_output_blt_operation {
 	UK_EFI_BLT_BUFFER_TO_VIDEO,
 	UK_EFI_BLT_VIDEO_TO_VIDEO,
 	UK_EFI_GRAPHICS_OUTPUT_BLT_OPERATION_MAX
+};
+
+struct uk_efi_graphics_output_mode_info {
+    __u32 version;
+    __u32 horizontal_resolution;
+    __u32 vertical_resolution;
+    enum uk_efi_graphics_pixel_format pixel_format;
+	struct uk_efi_pixel_bitmask pixel_information;
+    __u32 pixels_per_scan_line;
+};
+
+struct uk_efi_graphics_output_protocol_mode {
+    __u32 max_mode;
+    __u32 mode;
+    struct uk_efi_graphics_output_mode_info *info;
+    __u64 size_of_info;
+    __u64 frame_buffer_base;
+    __u64 frame_buffer_size;
+};
+
+struct uk_efi_graphics_output_protocol {
+    uk_efi_status_t (__uk_efi_api *query_mode)(struct uk_efi_graphics_output_protocol *this,
+                             __u32 mode_number,
+                             __u64 *size_of_info,
+                             struct uk_efi_graphics_output_mode_info **info);
+    uk_efi_status_t (__uk_efi_api *set_mode)(struct uk_efi_graphics_output_protocol *this, __u32 mode_number);
+	uk_efi_status_t (__uk_efi_api *blt)(struct uk_efi_graphics_output_protocol *this,
+                    struct uk_efi_graphics_output_blt_pixel *blt_buffer /* optional */,
+                    enum uk_efi_graphics_output_blt_operation blt_operation,
+                    __u64 source_x,
+                    __u64 source_y,
+                    __u64 destination_x,
+                    __u64 destination_y,
+                    __u64 width,
+                    __u64 height,
+                    __u64 delta /* optional */);
+    struct uk_efi_graphics_output_protocol_mode *mode;
 };
 
 struct uk_efi_mem_desc {

@@ -94,9 +94,10 @@ static inline void
 vmxnet3_comp_ring_adv_next2proc(struct vmxnet3_comp_ring *ring)
 {
 	ring->next2proc++;
-	if (unlikely(ring->next2proc == ring->size)) {
+	if (unlikely(ring->next2proc == ring->size - 1)) {
 		ring->next2proc = 0;
 		ring->gen = (uint8_t)(ring->gen ^ 1);
+		uk_pr_warn("Comp ring advance: next2proc=%u gen=%u\n", ring->next2proc, ring->gen);
 	}
 }
 
@@ -106,7 +107,6 @@ struct vmxnet3_txq_stats {
 				     * different reasons
 				     */
 	uint64_t        drop_too_many_segs;
-	uint64_t        drop_tso;
 	uint64_t        tx_ring_full;
 };
 
@@ -119,6 +119,7 @@ typedef struct uk_netdev_tx_queue {
 	uint32_t                     qid;
 	struct Vmxnet3_TxQueueDesc   *shared;
 	void                         *mz;
+	struct vmxnet3_txq_stats     stats;
 	bool                         stopped;
 	uint16_t                     queue_id;      /**< Device TX queue index. */
 	uint16_t                     port_id;       /**< Device port identifier. */
@@ -156,6 +157,7 @@ typedef struct uk_netdev_rx_queue {
 	struct uk_netbuf            *start_seg;
 	struct uk_netbuf            *last_seg;
 	void  					    *mz;
+	struct vmxnet3_rxq_stats    stats;
 	bool                        stopped;
 	uint16_t                    queue_id;      /**< Device RX queue index. */
 	uint16_t                    port_id;       /**< Device port identifier. */

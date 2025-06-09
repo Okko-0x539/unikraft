@@ -1,0 +1,7 @@
+config EFIGOPCONS
+	bool "EFI GOP console driver"
+	depends on VMWARE_BOOT_PROTO_EFI_STUB
+	depends on VMWARE_BOOT_PROTO_EFI_STUB_SETUP_GOP
+	depends on LIBUKCONSOLE
+	help
+        EFI Graphics Output Protocol console device driver.

@@ -94,6 +94,10 @@ SECTIONS
 	_ectors = .;
 
 	/* TLS Sections */
+	/* Need to be aligned to PAGE_SIZE, otherwise UK_ASSERT_VALID_KERNEL_MRD(mrdp) (reloc.c:133) fails because during boot
+	 * UK loads unaligned address (_etdata segment) (occurs with PIE at least)
+	 * Also satisfies the old ALIGN(0x20) */
+    //. = ALIGN(__PAGE_SIZE);
 	. = ALIGN(0x20);
 	_tls_start = .;
 	.tdata :

@@ -19,7 +19,7 @@ struct ukplat_bootinfo {
 	__u32 magic;
 
 	/** Version of the boot info */
-#define UKPLAT_BOOTINFO_VERSION			0x01
+#define UKPLAT_BOOTINFO_VERSION			0x02
 	__u8 version;
 	__u8 _pad0[3];
 
@@ -43,6 +43,9 @@ struct ukplat_bootinfo {
 	/** Address of UEFI System Table */
 	__u64 efi_st;
 
+	/** Address of UEFI GOP (Graphics Output Protocol) */
+	__u64 efi_gop;
+
 	/**
 	 * List of memory regions. Must be the last member as the
 	 * memory regions directly follow this boot information structure
@@ -50,7 +53,7 @@ struct ukplat_bootinfo {
 	struct ukplat_memregion_list mrds;
 } __packed __align(__SIZEOF_LONG__);
 
-UK_CTASSERT(sizeof(struct ukplat_bootinfo) == 80);
+UK_CTASSERT(sizeof(struct ukplat_bootinfo) == 88);
 
 #if CONFIG_UKPLAT_MEMRNAME
 #if __SIZEOF_LONG__ == 8

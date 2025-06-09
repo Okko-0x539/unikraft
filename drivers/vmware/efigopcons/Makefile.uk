@@ -1,0 +1,8 @@
+$(eval $(call addlib_s,efigopcons,$(CONFIG_EFIGOPCONS)))
+
+EFIGOPCONS_CINCLUDES-y += -I$(EFIGOPCONS_BASE)/include
+
+# TODO: Remove as soon as plat dependencies go away
+EFIGOPCONS_CINCLUDES-y += -I$(UK_PLAT_COMMON_BASE)/include
+
+EFIGOPCONS_SRCS-y += $(EFIGOPCONS_BASE)/efigop.c

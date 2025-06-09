@@ -37,11 +37,7 @@
 #include <uk/plat/common/acpi.h>
 #include <string.h>
 #include <errno.h>
-#ifdef CONFIG_PLAT_KVM
-#include <kvm/efi.h>
-#else
-#include <vmware/efi.h>
-#endif
+#include <uk/plat/common/efi.h>
 #include <uk/plat/common/bootinfo.h>
 
 #define RSDP10_LEN		20

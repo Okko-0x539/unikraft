@@ -36,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <uk/bus/pci.h>
 #include <uk/netdev_core.h>
+#include <uk/plat/io.h>
 
 #include "e1000_osdep.h"
 #include "e1000_regs.h"

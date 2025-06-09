@@ -347,7 +347,7 @@ int eth_em_xmit_pkts(__unused struct uk_netdev *dev,
 			 * Set up Transmit Data Descriptor.
 			 */
 			slen = m_seg->buflen;
-			buf_dma_addr = (uint64_t) m_seg->buf;
+			buf_dma_addr = (uint64_t) ukplat_virt_to_phys(m_seg->buf);
 
 			txd->buffer_addr = buf_dma_addr;
 			txd->lower.data = cmd_type_len | slen;
@@ -472,7 +472,7 @@ eth_em_recv_pkts(__unused struct uk_netdev *dev, struct uk_netdev_rx_queue *rx_q
 		/* Rearm RXD: attach new mbuf and reset status to zero. */
 		rxm = rxe->mbuf;
 		rxe->mbuf = nmb;
-		dma_addr = (uint64_t) nmb->buf;
+		dma_addr = (uint64_t) ukplat_virt_to_phys(nmb->buf);
 
 		rxdp->buffer_addr = dma_addr;
 		rxdp->status = 0;
@@ -671,7 +671,7 @@ eth_em_tx_queue_setup(struct uk_netdev *dev,
 	txq->hw = hw;
 
 	txq->tdt_reg_addr = E1000_PCI_REG_ADDR(hw, E1000_TDT(queue_idx));
-	txq->tx_ring_phys_addr = (uint64_t) mem;
+	txq->tx_ring_phys_addr = (uint64_t) ukplat_virt_to_phys(mem);
 	txq->tx_ring = (struct e1000_data_desc *) mem;
 
 	em_reset_tx_queue(txq);
@@ -785,7 +785,7 @@ eth_em_rx_queue_setup(struct uk_netdev *dev,
 
 	rxq->rdt_reg_addr = E1000_PCI_REG_ADDR(hw, E1000_RDT(queue_idx));
 	rxq->rdh_reg_addr = E1000_PCI_REG_ADDR(hw, E1000_RDH(queue_idx));
-	rxq->rx_ring_phys_addr = (uint64_t) mem;
+	rxq->rx_ring_phys_addr = (uint64_t) ukplat_virt_to_phys(mem);
 	rxq->rx_ring = (struct e1000_rx_desc *) mem;
 
 	dev->_rx_queue[queue_idx] = (struct uk_netdev_rx_queue *) rxq;
@@ -920,7 +920,7 @@ em_alloc_rx_queue_mbufs(struct em_rx_queue *rxq)
 			return -ENOMEM;
 		}
 
-		dma_addr = (uint64_t)mbuf->buf;
+		dma_addr = (uint64_t) ukplat_virt_to_phys(mbuf->buf);
 
 		/* Clear HW ring memory */
 		rxq->rx_ring[i] = rxd_init;

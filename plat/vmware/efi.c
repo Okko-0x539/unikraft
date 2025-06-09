@@ -4,7 +4,7 @@
  * You may not use this file except in compliance with the License.
  */
 
-#include <vmware/efi.h>
+#include <uk/plat/common/efi.h>
 #include <uk/arch/paging.h>
 #include <uk/libid.h>
 #include <uk/plat/common/bootinfo.h>
@@ -602,6 +602,37 @@ static void uk_efi_setup_bootinfo_dtb(struct ukplat_bootinfo *bi)
 	bi->dtb = (__u64)dtb;
 }
 
+static void uk_efi_setup_bootinfo_gop(struct ukplat_bootinfo *bi)
+{
+#ifdef CONFIG_VMWARE_BOOT_PROTO_EFI_STUB_SETUP_GOP
+	struct uk_efi_graphics_output_protocol *gop = NULL;
+	struct ukplat_memregion_desc mrd = {0};
+    uk_efi_guid_t gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+    uk_efi_status_t status;
+
+    status = uk_efi_bs->locate_protocol(&gop_guid, NULL, (void **)&gop);
+    if (status != UK_EFI_SUCCESS || gop == NULL) {
+        // GOP not found
+		UK_EFI_CRASH("Couldn't locate EFI Graphics Output Protocol\n");
+    }
+
+	mrd.pbase = gop->mode->frame_buffer_base;
+	mrd.vbase = gop->mode->frame_buffer_base;
+	mrd.len = gop->mode->frame_buffer_size;
+	mrd.pg_off = 0;
+	mrd.pg_count = PAGE_COUNT(mrd.len);
+	mrd.type = UKPLAT_MEMRT_RESERVED;
+	mrd.flags = UKPLAT_MEMRF_READ | UKPLAT_MEMRF_WRITE;
+
+	int rc = ukplat_memregion_list_insert(&bi->mrds, &mrd);
+	if (rc < 0) {
+		UK_EFI_CRASH("Failed to insert framebuffer memory region");
+	}
+
+	bi->efi_gop = (__u64)gop;
+#endif
+}
+
 static void uk_efi_setup_bootinfo(void)
 {
 	const char bl[] = "EFI_STUB";
@@ -614,6 +645,7 @@ static void uk_efi_setup_bootinfo(void)
 
 	memcpy(bi->bootloader, bl, sizeof(bl));
 	memcpy(bi->bootprotocol, bp, sizeof(bp));
+	uk_efi_setup_bootinfo_gop(bi);
 	uk_efi_setup_bootinfo_cmdl(bi);
 	uk_efi_setup_bootinfo_initrd(bi);
 	uk_efi_setup_bootinfo_dtb(bi);
