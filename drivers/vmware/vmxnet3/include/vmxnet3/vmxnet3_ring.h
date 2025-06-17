@@ -94,10 +94,9 @@ static inline void
 vmxnet3_comp_ring_adv_next2proc(struct vmxnet3_comp_ring *ring)
 {
 	ring->next2proc++;
-	if (unlikely(ring->next2proc == ring->size - 1)) {
+	if (unlikely(ring->next2proc == ring->size)) {
 		ring->next2proc = 0;
 		ring->gen = (uint8_t)(ring->gen ^ 1);
-		uk_pr_warn("Comp ring advance: next2proc=%u gen=%u\n", ring->next2proc, ring->gen);
 	}
 }
 

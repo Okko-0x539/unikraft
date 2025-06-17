@@ -141,7 +141,6 @@ static int efi_gop_init(struct ukplat_bootinfo *bi)
     pixels_per_scanline = gop->mode->info->pixels_per_scan_line;
 
     efi_gop_clear_screen();
-
 	uk_console_init(&efi_gop_dev, "efigopcons", &efi_gop_ops, UK_CONSOLE_FLAG_STDOUT);
 	uk_console_register(&efi_gop_dev);
 

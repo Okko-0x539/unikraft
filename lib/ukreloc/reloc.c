@@ -119,13 +119,6 @@ void do_uk_reloc_kmrds(__paddr_t r_paddr, __vaddr_t r_vaddr)
 	if (r_vaddr == 0)
 		r_vaddr = (__vaddr_t)rt_baddr;
 
-	bool temp = false;
-
-	while(temp){
-		int count = 0;
-		count++;
-	}
-
 	/* Since we may have been placed at a random physical address, adjust
 	 * the initial memory region descriptors added through mkbootinfo.py
 	 * since they contain the link-time addresses, relative to rt_baddr.
