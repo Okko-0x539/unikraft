@@ -117,6 +117,12 @@ struct uk_netbuf *uk_netbuf_alloc_indir(struct uk_alloc *a,
 	m->_a = a;
 	m->_b = m;
 
+	if (privlen)
+		uk_pr_debug("[uk_netbuf_alloc_indir][1] Allocated %d bytes for packet %p\n", NETBUF_ADDR_ALIGN_UP(sizeof(*m)) + privlen, m);
+	else
+		uk_pr_debug("[uk_netbuf_alloc_indir][2] Allocated %d bytes for packet %p\n", sizeof(*m), m);
+	
+
 	return m;
 }
 
@@ -136,6 +142,8 @@ struct uk_netbuf *uk_netbuf_alloc_buf(struct uk_alloc *a, size_t buflen,
 	mem = uk_memalign(a, bufalign, alloc_len);
 	if (!mem)
 		return NULL;
+
+	uk_pr_debug("[uk_netbuf_alloc_buf] Allocated %d bytes for packet %p\n", alloc_len, mem);
 
 	m = uk_netbuf_prepare_buf(mem,
 				  alloc_len,
@@ -248,6 +256,8 @@ void uk_netbuf_free_single(struct uk_netbuf *m)
 
 	UK_ASSERT(m);
 
+	uk_pr_debug("[uk_netbuf_free_single] Freeing packet %p\n", m);
+
 	/* Decrease refcount and call destructor and free up memory
 	 * when last reference was released.
 	 */
@@ -272,7 +282,7 @@ void uk_netbuf_free_single(struct uk_netbuf *m)
 		if (a && b)
 			uk_free(a, b);
 	} else {
-		uk_pr_debug("Not freeing netbuf %p (next: %p): refcount greater than 1",
+		uk_pr_debug("[uk_netbuf_free_single] Not freeing netbuf %p (next: %p): refcount greater than 1",
 			    m, m->next);
 	}
 }

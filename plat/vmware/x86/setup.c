@@ -101,7 +101,7 @@ void _ukplat_entry(struct lcpu *lcpu, struct ukplat_bootinfo *bi)
 	_check_ospke();
 #endif /* CONFIG_HAVE_X86PKU */
 
-	uk_pr_warn("_text address is %p\n", _text);
+	//uk_pr_warn("_text address is %p\n", _text);
 	/* Switch away from the bootstrap stack */
 	uk_pr_info("Switch from bootstrap stack to stack @%p\n", bstack);
 	lcpu_arch_jump_to(bstack, ukplat_entry2);

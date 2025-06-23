@@ -134,8 +134,6 @@ def main():
             # Offset in the first page is equal to the start of the first page
             pg_off = 0
 
-            if int(phdr[1], base=16) < 100:
-                continue
             # Align size up to page size
             size = (int(phdr[1], base=16) + (PAGE_SIZE - 1)) & ~(PAGE_SIZE - 1)
             if size == 0:
